@@ -1,32 +1,81 @@
 # teori graf week 2  
 
-Hierholzer’s Algorithm — Description
-Purpose:
+# 🧩 Hierholzer’s Algorithm in Python
 
-Hierholzer’s Algorithm is used to find:
+This project implements **Hierholzer’s Algorithm**, which is used to find an **Eulerian Path** or **Eulerian Circuit** in a graph.  
+It works for **undirected graphs**, but can easily be adapted for **directed graphs** as well.
 
-Eulerian Circuit → a path that visits every edge exactly once and returns to the starting vertex.
+---
 
-Eulerian Path → a path that visits every edge exactly once, but does not necessarily return to the starting vertex.
+## 📘 Description
 
-This algorithm works on graphs that contain an Eulerian path or circuit, meaning:
+Hierholzer’s Algorithm is designed to find a path or circuit that visits **every edge exactly once**.
 
-All vertices have even degree → Eulerian Circuit
+- **Eulerian Path** → a path that visits every edge exactly once (does **not** have to return to the starting vertex).  
+- **Eulerian Circuit** → a path that visits every edge exactly once and **returns** to the starting vertex.
 
-Exactly two vertices have odd degree → Eulerian Path
+The algorithm only works if the graph satisfies **Euler’s conditions**:
+- All vertices have **even degree** → Eulerian Circuit exists.  
+- Exactly **two vertices have odd degree** → Eulerian Path exists.  
+- Otherwise, no Eulerian Path or Circuit exists.
 
-Input and Output Description
-Input
+---
 
-The number of vertices in the graph.
+## ⚙️ How It Works
 
-A list of edges that connect pairs of vertices.
+1. Choose a starting vertex:
+   - If there are exactly two vertices with odd degree → start at one of them.
+   - If all vertices have even degree → start at any vertex.
+2. Use a **stack** to explore edges from the current vertex.
+3. Remove edges as they are traversed.
+4. When you reach a dead end (no more edges), backtrack by popping vertices from the stack.
+5. Reverse the recorded path to get the correct Eulerian traversal.
 
-Since this is an undirected graph, each edge connects two vertices in both directions.
+---
 
-Vertices can be represented by numbers (e.g., 0, 1, 2, 3, etc.).
+## 🧠 Example Code
 
-Example Input (in code):
+```python
+from collections import defaultdict
+
+class Graph:
+    def __init__(self, vertices):
+        self.graph = defaultdict(list)
+        self.V = vertices
+
+    def add_edge(self, u, v):
+        self.graph[u].append(v)
+        self.graph[v].append(u)
+
+    def find_euler(self):
+        odd = [v for v in range(self.V) if len(self.graph[v]) % 2 != 0]
+
+        if len(odd) == 0:
+            start = 0
+            print("Eulerian Circuit found:")
+        elif len(odd) == 2:
+            start = odd[0]
+            print("Eulerian Path found:")
+        else:
+            print("No Eulerian Path/Circuit.")
+            return
+
+        stack = [start]
+        path = []
+
+        while stack:
+            v = stack[-1]
+            if self.graph[v]:
+                u = self.graph[v].pop()
+                self.graph[u].remove(v)
+                stack.append(u)
+            else:
+                path.append(stack.pop())
+
+        print(" -> ".join(map(str, path[::-1])))
+
+
+# ======== Example Usage ========
 
 g = Graph(5)
 g.add_edge(0, 1)
@@ -36,54 +85,5 @@ g.add_edge(2, 3)
 g.add_edge(3, 4)
 g.add_edge(4, 2)
 
-
-This means:
-
-The graph has 5 vertices (0–4)
-And the following edges:
-0–1, 0–2, 1–2, 2–3, 3–4, 4–2
-
-Output
-
-The algorithm prints:
-
-The type of Eulerian traversal:
-
-“Eulerian Circuit found” → all vertices have even degree.
-
-“Eulerian Path found” → exactly two vertices have odd degree.
-
-“No Eulerian Path/Circuit” → the graph does not meet Euler’s conditions.
-
-The order of vertices visited in the Eulerian path or circuit.
-
-Example Output:
-
-Graph 1:
-Eulerian Path found:
-0 -> 1 -> 2 -> 0 -> 2 -> 4 -> 3 -> 2
-
-
-Explanation:
-
-The graph has two vertices with odd degree, so an Eulerian Path exists.
-
-The output shows the sequence of vertices that visits every edge exactly once.
-
-How the Algorithm Works (Simplified)
-
-Choose a starting vertex:
-
-If there are two vertices with odd degree → start at one of them.
-
-If all vertices have even degree → start at any vertex.
-
-Use a stack to keep track of the traversal path.
-
-While there are still edges:
-
-Move along unused edges, removing them as you go.
-
-When no more edges can be used from a vertex, backtrack using the stack.
-
-Once all edges are visited, reverse the recorded path to get the correct Eulerian path/circuit order.
+print("Graph 1:")
+g.find_euler()
